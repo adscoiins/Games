@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,57 +18,37 @@
             height: 100vh;
             color: white;
         }
-        .logo-container {
-            margin-top: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .logo {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-        }
-        .logo img {
-            width: 90%;
-            border-radius: 50%;
-        }
         .points {
             font-size: 56px;
             margin: 20px 0;
         }
-        .button-container {
+        .question-container {
+            margin: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        .question {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        .options {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
         }
-        .button {
+        .option {
             background-color: #0088cc;
             color: white;
             padding: 15px;
-            font-size: 20px;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            width: 80%;
-            max-width: 300px;
-            margin: 0 auto;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
+            transition: background-color 0.3s;
         }
-        .button i {
-            font-size: 24px;
-        }
-        .button:hover {
+        .option:hover {
             background-color: #0077b3;
         }
         footer {
@@ -93,24 +73,12 @@
         footer a:hover {
             text-decoration: underline;
         }
-        .question-container {
-            margin-top: 20px;
-        }
-        .question {
-            font-size: 24px;
-            margin: 20px 0;
-        }
-        .answers {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .welcome-popup, .notification-popup {
+        .welcome-popup {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #444;
+            background-color: #333;
             color: white;
             padding: 20px;
             border-radius: 10px;
@@ -119,10 +87,10 @@
             z-index: 1000;
             display: none;
         }
-        .welcome-popup h2, .notification-popup h2 {
+        .welcome-popup h2 {
             margin-bottom: 10px;
         }
-        .welcome-popup button, .notification-popup button {
+        .welcome-popup button {
             background-color: #0088cc;
             color: white;
             padding: 10px 20px;
@@ -130,34 +98,25 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .welcome-popup button:hover, .notification-popup button:hover {
+        .welcome-popup button:hover {
             background-color: #0077b3;
         }
     </style>
 </head>
 <body>
 
-    <div class="logo-container">
-        <div class="logo">
-            <img src="https://i.suar.me/2GLP4/l" alt="Logo">
-        </div>
-    </div>
-
     <div class="points" id="pointsDisplay">
         0
     </div>
 
-    <div class="question-container" id="questionContainer">
-        <div class="question" id="question">What is the capital of Algeria?</div>
-        <div class="answers">
-            <button class="button" onclick="checkAnswer('wrong', this)">Paris</button>
-            <button class="button" onclick="checkAnswer('correct', this)">Algiers</button>
-            <button class="button" onclick="checkAnswer('wrong', this)">Marrakech</button>
+    <div class="question-container">
+        <div class="question" id="questionDisplay">What is the first cryptocurrency ever created?</div>
+        <div class="options">
+            <button class="option" onclick="selectAnswer(1)">Bitcoin</button>
+            <button class="option" onclick="selectAnswer(2)">Ethereum</button>
+            <button class="option" onclick="selectAnswer(3)">Litecoin</button>
+            <button class="option" onclick="selectAnswer(4)">Ripple</button>
         </div>
-    </div>
-
-    <div class="button-container">
-        <!-- Required buttons only -->
     </div>
 
     <footer>
@@ -180,15 +139,9 @@
     </footer>
 
     <div class="welcome-popup" id="welcomePopup">
-        <h2>Welcome, <span id="usernameDisplay"></span>!</h2>
-        <p>You have been awarded 20,000 points. Enjoy your journey with us!</p>
-        <button onclick="closePopup('welcomePopup')">Start Now</button>
-    </div>
-
-    <div class="notification-popup" id="notificationPopup">
-        <h2 id="notificationTitle"></h2>
-        <p id="notificationMessage"></p>
-        <button onclick="closePopup('notificationPopup')">Okay</button>
+        <h2>مرحبًا بك، <span id="usernameDisplay"></span>!</h2>
+        <p>لقد تم إضافة 20,000 نقطة إلى حسابك. استمتع برحلتك معنا!</p>
+        <button onclick="closePopup()">البدء</button>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -198,8 +151,10 @@
         let points = localStorage.getItem('points') ? parseInt(localStorage.getItem('points')) : 0;
 
         if (points === 0) {
-            points = 20000; 
+            points = 20000; // نقاط أول دخول
             localStorage.setItem('points', points);
+            const welcomePopup = document.getElementById('welcomePopup');
+            welcomePopup.style.display = 'block';
         }
 
         pointsDisplay.textContent = points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -207,45 +162,22 @@
         const tg = window.Telegram.WebApp;
 
         let username = tg.initDataUnsafe?.user?.username || 'Guest';
-
         localStorage.setItem('username', username);
-
         document.getElementById('usernameDisplay').textContent = username;
 
-        const welcomePopup = document.getElementById('welcomePopup');
-        welcomePopup.style.display = 'block';
-
-        function closePopup(popupId) {
-            const popup = document.getElementById(popupId);
-            popup.style.display = 'none';
+        function closePopup() {
+            document.getElementById('welcomePopup').style.display = 'none';
         }
 
-        function checkAnswer(answer, button) {
-            const correctAnswer = 'correct';
-            if (answer === correctAnswer) {
-                let lastAnswerDate = localStorage.getItem('lastAnswerDate');
-                const today = new Date().toISOString().slice(0, 10);
-
-                if (lastAnswerDate !== today) {
-                    points += 2000; 
-                    localStorage.setItem('points', points);
-                    pointsDisplay.textContent = points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                    showNotification('Success!', 'Correct answer! 2000 points have been added to your account.');
-                    localStorage.setItem('lastAnswerDate', today);
-                } else {
-                    showNotification('Notice!', 'You have already answered this question today. Try again tomorrow.');
-                }
-            } else {
-                showNotification('Error!', 'Wrong answer! Try again.');
+        function selectAnswer(option) {
+            console.log('تم اختيار الخيار: ' + option);
+            if (option === 1) {
+                points += 100; // مثال على إضافة نقاط عند الإجابة الصحيحة
             }
-        }
-
-        function showNotification(title, message) {
-            const notificationPopup = document.getElementById('notificationPopup');
-            document.getElementById('notificationTitle').textContent = title;
-            document.getElementById('notificationMessage').textContent = message;
-            notificationPopup.style.display = 'block';
+            localStorage.setItem('points', points);
+            pointsDisplay.textContent = points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
     </script>
+
 </body>
 </html>
