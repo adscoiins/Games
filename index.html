@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -73,7 +73,7 @@
         footer a:hover {
             text-decoration: underline;
         }
-        .welcome-popup {
+        .welcome-popup, .result-popup {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -87,10 +87,10 @@
             z-index: 1000;
             display: none;
         }
-        .welcome-popup h2 {
+        .welcome-popup h2, .result-popup h2 {
             margin-bottom: 10px;
         }
-        .welcome-popup button {
+        .welcome-popup button, .result-popup button {
             background-color: #0088cc;
             color: white;
             padding: 10px 20px;
@@ -98,25 +98,28 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .welcome-popup button:hover {
+        .welcome-popup button:hover, .result-popup button:hover {
             background-color: #0077b3;
+        }
+        .countdown {
+            margin-top: 10px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
 
-    <div class="points" id="pointsDisplay">
-        0
-    </div>
+    <div class="points" id="pointsDisplay">0</div>
 
     <div class="question-container">
         <div class="question" id="questionDisplay">What is the first cryptocurrency ever created?</div>
         <div class="options">
-            <button class="option" onclick="selectAnswer(1)">Bitcoin</button>
-            <button class="option" onclick="selectAnswer(2)">Ethereum</button>
-            <button class="option" onclick="selectAnswer(3)">Litecoin</button>
-            <button class="option" onclick="selectAnswer(4)">Ripple</button>
+            <button class="option" id="option1" onclick="selectAnswer(1)">Bitcoin</button>
+            <button class="option" id="option2" onclick="selectAnswer(2)">Ethereum</button>
+            <button class="option" id="option3" onclick="selectAnswer(3)">Litecoin</button>
+            <button class="option" id="option4" onclick="selectAnswer(4)">Ripple</button>
         </div>
+        <div class="countdown" id="countdownDisplay"></div>
     </div>
 
     <footer>
@@ -139,44 +142,79 @@
     </footer>
 
     <div class="welcome-popup" id="welcomePopup">
-        <h2>مرحبًا بك، <span id="usernameDisplay"></span>!</h2>
-        <p>لقد تم إضافة 20,000 نقطة إلى حسابك. استمتع برحلتك معنا!</p>
-        <button onclick="closePopup()">البدء</button>
+        <h2>Welcome, <span id="usernameDisplay"></span>!</h2>
+        <p>You have been awarded 20,000 points. Enjoy your journey with us!</p>
+        <button onclick="closePopup('welcomePopup')">Start</button>
+    </div>
+
+    <div class="result-popup" id="resultPopup">
+        <h2 id="resultMessage"></h2>
+        <button onclick="closePopup('resultPopup')">OK</button>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <script>
         const pointsDisplay = document.getElementById('pointsDisplay');
+        const countdownDisplay = document.getElementById('countdownDisplay');
         let points = localStorage.getItem('points') ? parseInt(localStorage.getItem('points')) : 0;
-
+        let lastAnsweredDate = localStorage.getItem('lastAnsweredDate') ? new Date(localStorage.getItem('lastAnsweredDate')) : null;
+        const currentDate = new Date();
+        const nextAnswerDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1, 0, 0, 0);
+        
         if (points === 0) {
-            points = 20000; // نقاط أول دخول
+            points = 20000; // Initial points for first entry
             localStorage.setItem('points', points);
             const welcomePopup = document.getElementById('welcomePopup');
             welcomePopup.style.display = 'block';
         }
 
         pointsDisplay.textContent = points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-        const tg = window.Telegram.WebApp;
-
-        let username = tg.initDataUnsafe?.user?.username || 'Guest';
+        let username = window.Telegram.WebApp.initDataUnsafe?.user?.username || 'Guest';
         localStorage.setItem('username', username);
         document.getElementById('usernameDisplay').textContent = username;
 
-        function closePopup() {
-            document.getElementById('welcomePopup').style.display = 'none';
+        function closePopup(popupId) {
+            document.getElementById(popupId).style.display = 'none';
         }
 
         function selectAnswer(option) {
-            console.log('تم اختيار الخيار: ' + option);
-            if (option === 1) {
-                points += 100; // مثال على إضافة نقاط عند الإجابة الصحيحة
+            if (lastAnsweredDate && currentDate.toDateString() === lastAnsweredDate.toDateString()) {
+                showCountdown();
+                return;
             }
-            localStorage.setItem('points', points);
-            pointsDisplay.textContent = points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            
+            if (option === 1) {
+                points += 2000; // Add points for correct answer
+                localStorage.setItem('points', points);
+                pointsDisplay.textContent = points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                document.getElementById('resultMessage').textContent = "2000 points have been added!";
+                document.getElementById('resultPopup').style.display = 'block';
+                lastAnsweredDate = new Date();
+                localStorage.setItem('lastAnsweredDate', lastAnsweredDate);
+                document.querySelectorAll('.option').forEach(btn => btn.style.backgroundColor = '');
+                document.getElementById('option1').style.backgroundColor = 'green';
+            } else {
+                document.getElementById('resultMessage').textContent = "Better luck next time!";
+                document.getElementById('resultPopup').style.display = 'block';
+            }
+            showCountdown();
         }
+
+        function showCountdown() {
+            const timeDiff = nextAnswerDate - currentDate;
+            if (timeDiff > 0) {
+                const hours = Math.floor((timeDiff % 86400000) / 3600000);
+                const minutes = Math.floor((timeDiff % 3600000) / 60000);
+                const seconds = Math.floor((timeDiff % 60000) / 1000);
+                countdownDisplay.textContent = `You can answer again in ${hours}h ${minutes}m ${seconds}s`;
+                setTimeout(showCountdown, 1000);
+            } else {
+                countdownDisplay.textContent = "";
+            }
+        }
+
+        showCountdown(); // Initialize countdown on page load
     </script>
 
 </body>
