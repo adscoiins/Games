@@ -3,218 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Points Page</title>
+    <title>Point Collection Game</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"> <!-- مكتبة الأنيميشن -->
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             text-align: center;
-            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+            background: linear-gradient(135deg, #ffcc33, #ff6699); /* خلفية ملونة جميلة */
+            color: white;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
-            color: white;
+        }
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
         }
         .points {
-            font-size: 56px;
+            font-size: 32px;
             margin: 20px 0;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
         }
-        .question-container {
-            margin: 20px;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        .game-area {
+            width: 80%;
+            height: 60vh;
+            position: relative;
+            border: 2px dashed #0088cc;
+            overflow: hidden;
+            margin: 20px auto;
+            background: rgba(51, 51, 51, 0.7); /* خلفية للمنطقة */
         }
-        .question {
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .option {
-            background-color: #0088cc;
-            color: white;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
+        .collectible {
+            width: 50px;
+            height: 50px;
+            background-image: url('https://i.suar.me/X88EZ/l');
+            background-size: cover; /* تأكد من أن الصورة تغطي العنصر */
+            position: absolute;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
-            transition: background-color 0.3s;
+            transition: transform 0.3s;
         }
-        .option:hover {
-            background-color: #0077b3;
+        .collectible:hover {
+            transform: scale(1.1);
+            animation: bounce 0.3s; /* تأثير الارتداد عند التحويم */
         }
-        footer {
-            background-color: #333;
-            color: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-        }
-        footer a {
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-        footer a i {
-            font-size: 24px;
-        }
-        footer a:hover {
-            text-decoration: underline;
-        }
-        .welcome-popup, .result-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #333;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            z-index: 1000;
-            display: none;
-        }
-        .welcome-popup h2, .result-popup h2 {
-            margin-bottom: 10px;
-        }
-        .welcome-popup button, .result-popup button {
-            background-color: #0088cc;
+        .button {
+            background-color: #ff8800; /* اللون البرتقالي */
             color: white;
             padding: 10px 20px;
+            font-size: 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
+            margin: 10px;
+            transition: background-color 0.3s, transform 0.2s;
         }
-        .welcome-popup button:hover, .result-popup button:hover {
-            background-color: #0077b3;
+        .button:hover {
+            background-color: #ff7700; /* لون داكن أكثر عند التحويم */
+            transform: scale(1.05);
         }
-        .countdown {
-            margin-top: 10px;
-            font-size: 18px;
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="points" id="pointsDisplay">0</div>
+    <h1>Point Collection Game</h1>
+    <div class="points" id="pointsDisplay">Points: 0</div>
+    <div class="game-area" id="gameArea"></div>
+    <button class="button" id="startButton">Start Game</button>
 
-    <div class="question-container">
-        <div class="question" id="questionDisplay">What is the first cryptocurrency ever created?</div>
-        <div class="options">
-            <button class="option" id="option1" onclick="selectAnswer(1)">Bitcoin</button>
-            <button class="option" id="option2" onclick="selectAnswer(2)">Ethereum</button>
-            <button class="option" id="option3" onclick="selectAnswer(3)">Litecoin</button>
-            <button class="option" id="option4" onclick="selectAnswer(4)">Ripple</button>
-        </div>
-        <div class="countdown" id="countdownDisplay"></div>
-    </div>
-
-    <footer>
-        <a href="https://adscoiins.github.io/Home1/">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </a>
-        <a href="https://adscoiins.github.io/Games/">
-            <i class="fas fa-gamepad"></i>
-            <span>Games</span>
-        </a>
-        <a href="https://adscoiins.github.io/Tasks/">
-            <i class="fas fa-tasks"></i>
-            <span>Tasks</span>
-        </a>
-        <a href="https://adscoiins.github.io/Referral/">
-            <i class="fas fa-users"></i>
-            <span>Friends</span>
-        </a>
-    </footer>
-
-    <div class="welcome-popup" id="welcomePopup">
-        <h2>Welcome, <span id="usernameDisplay"></span>!</h2>
-        <p>You have been awarded 20,000 points. Enjoy your journey with us!</p>
-        <button onclick="closePopup('welcomePopup')">Start</button>
-    </div>
-
-    <div class="result-popup" id="resultPopup">
-        <h2 id="resultMessage"></h2>
-        <button onclick="closePopup('resultPopup')">OK</button>
-    </div>
-
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- زر العودة إلى الصفحة الرئيسية -->
+    <button class="button" id="homeButton">Back to Home</button>
 
     <script>
         const pointsDisplay = document.getElementById('pointsDisplay');
-        const countdownDisplay = document.getElementById('countdownDisplay');
-        let points = localStorage.getItem('points') ? parseInt(localStorage.getItem('points')) : 0;
-        let lastAnsweredDate = localStorage.getItem('lastAnsweredDate') ? new Date(localStorage.getItem('lastAnsweredDate')) : null;
-        const currentDate = new Date();
-        const nextAnswerDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1, 0, 0, 0);
-        
-        if (points === 0) {
-            points = 20000; // Initial points for first entry
-            localStorage.setItem('points', points);
-            const welcomePopup = document.getElementById('welcomePopup');
-            welcomePopup.style.display = 'block';
+        const gameArea = document.getElementById('gameArea');
+        const startButton = document.getElementById('startButton');
+        const homeButton = document.getElementById('homeButton');
+        let points = 0;
+        let gameActive = false;
+
+        startButton.addEventListener('click', startGame);
+        homeButton.addEventListener('click', goToHome);
+
+        function startGame() {
+            points = 0;
+            pointsDisplay.textContent = "Points: " + points;
+            gameActive = true;
+            gameArea.innerHTML = ''; // Clear previous collectibles
+            spawnCollectibles(); // Spawn initial collectibles
+            setInterval(spawnCollectibles, 2000); // Spawn new collectibles every 2 seconds
         }
 
-        pointsDisplay.textContent = points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        let username = window.Telegram.WebApp.initDataUnsafe?.user?.username || 'Guest';
-        localStorage.setItem('username', username);
-        document.getElementById('usernameDisplay').textContent = username;
+        function spawnCollectibles() {
+            if (!gameActive) return;
 
-        function closePopup(popupId) {
-            document.getElementById(popupId).style.display = 'none';
-        }
+            // زيادة عدد العناصر القابلة للتجميع
+            for (let i = 0; i < 3; i++) { // زيادة العدد إلى 3
+                const collectible = document.createElement('div');
+                collectible.classList.add('collectible');
+                collectible.style.top = Math.random() * (gameArea.clientHeight - 50) + 'px';
+                collectible.style.left = Math.random() * (gameArea.clientWidth - 50) + 'px';
 
-        function selectAnswer(option) {
-            if (lastAnsweredDate && currentDate.toDateString() === lastAnsweredDate.toDateString()) {
-                showCountdown();
-                return;
-            }
-            
-            if (option === 1) {
-                points += 2000; // Add points for correct answer
-                localStorage.setItem('points', points);
-                pointsDisplay.textContent = points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                document.getElementById('resultMessage').textContent = "2000 points have been added!";
-                document.getElementById('resultPopup').style.display = 'block';
-                lastAnsweredDate = new Date();
-                localStorage.setItem('lastAnsweredDate', lastAnsweredDate);
-                document.querySelectorAll('.option').forEach(btn => btn.style.backgroundColor = '');
-                document.getElementById('option1').style.backgroundColor = 'green';
-            } else {
-                document.getElementById('resultMessage').textContent = "Better luck next time!";
-                document.getElementById('resultPopup').style.display = 'block';
-            }
-            showCountdown();
-        }
+                collectible.addEventListener('click', collectPoint);
 
-        function showCountdown() {
-            const timeDiff = nextAnswerDate - currentDate;
-            if (timeDiff > 0) {
-                const hours = Math.floor((timeDiff % 86400000) / 3600000);
-                const minutes = Math.floor((timeDiff % 3600000) / 60000);
-                const seconds = Math.floor((timeDiff % 60000) / 1000);
-                countdownDisplay.textContent = `You can answer again in ${hours}h ${minutes}m ${seconds}s`;
-                setTimeout(showCountdown, 1000);
-            } else {
-                countdownDisplay.textContent = "";
+                gameArea.appendChild(collectible);
+                setTimeout(() => {
+                    if (collectible.parentElement) {
+                        collectible.remove(); // Remove collectible after 5 seconds if not collected
+                    }
+                }, 5000);
             }
         }
 
-        showCountdown(); // Initialize countdown on page load
+        function collectPoint(event) {
+            points += 10; // إضافة 10 نقاط بدلاً من 1
+            pointsDisplay.textContent = "Points: " + points;
+            event.target.remove(); // Remove collectible on collection
+            savePoints(points); // Save points after collection
+        }
+
+        function savePoints(points) {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                // Save points to your existing script (use your API call logic here)
+                // Example: saveUserPoints(userId, points);
+            }
+        }
+
+        function goToHome() {
+            window.location.href = "https://adscoiins.github.io/Home1/"; // رابط الصفحة الرئيسية
+        }
     </script>
 
 </body>
